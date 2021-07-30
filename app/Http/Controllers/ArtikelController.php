@@ -65,7 +65,7 @@ class ArtikelController extends Controller
         $artikel->save();
 
         $categories = $req->categories;
-        $artikel->kategori->attach($categories);
+        $artikel->kategori()->attach($categories);
 
         return response()->json([
             'status' => 'success',
@@ -76,12 +76,25 @@ class ArtikelController extends Controller
 
     public function updateArtikel(Request $req, $id)
     {
-        Artikel::where('id_artikel', $id)->update($req->all());
+        $artikel = Artikel::find($id);
+        if (!$artikel) {
+            return response()->json([
+                'status' => 'failed',
+                'message' => 'article data not found',
+            ], 404);
+        }
+        $artikel->judul = $req->judul;
+        $artikel->headline = $req->headline;
+        $artikel->isi = $req->isi;
+        $artikel->save();
+        $artikel->kategori()->detach();
+        $categories = $req->categories;
+        $artikel->kategori()->attach($categories);
 
         return response()->json([
             'status' => 'success',
             'message' => 'successfully updated article',
-            'data' => $req->all()
+            'data' => $artikel
         ], 200);
     }
 
