@@ -3,16 +3,10 @@
 namespace App\Entity;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\Pivot;
 
-class ArtikelKategori extends Model
+class ArtikelKategori extends Pivot
 {
     protected $table = 'artikel_kategori';
-    protected $primaryKey = 'id';
-    protected $fillable = ['id_artikel', 'kode_kategori'];
-    public $timestamps = false;
-
-    public function c()
-    {
-        return $this->belongsToMany(Kategori::class, 'kode_kategori', 'kode_kategori');
-    }
+    public $incrementing = true;
 }

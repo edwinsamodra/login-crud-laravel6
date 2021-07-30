@@ -2,6 +2,8 @@
 
 namespace App\Entity;
 
+use App\Entity\Artikel;
+use App\Entity\ArtikelKategori;
 use Illuminate\Database\Eloquent\Model;
 
 class Kategori extends Model
@@ -12,8 +14,10 @@ class Kategori extends Model
     protected $fillable = ['kode_kategori', 'nama_kategori'];
     public $timestamps = false;
 
-    public function b()
+    public function artikel()
     {
-        // return $this->hasMany(Artikel_kategori::class, 'kode_kategori', 'kode_kategori');
+        return $this
+        ->belongsToMany(Kategori::class, 'artikel_kategori', 'kode_kategori', 'id_artikel')
+        ->using(ArtikelKategori::class);
     }
 }
