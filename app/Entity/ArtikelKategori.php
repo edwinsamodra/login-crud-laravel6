@@ -4,7 +4,7 @@ namespace App\Entity;
 
 use Illuminate\Database\Eloquent\Model;
 
-class Artikel_kategori extends Model
+class ArtikelKategori extends Model
 {
     protected $table = 'artikel_kategori';
     protected $primaryKey = 'id';
