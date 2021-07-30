@@ -82,27 +82,13 @@ class ArtikelController extends Controller
         $artikel->isi = $req->isi;
         $artikel->save();
 
-        $categories = explode('&', $req->nama_kategori);
-
-        foreach ($categories as $key => $category) {
-            $kode = strtoupper(substr($category, 0, 3));
-
-            // ini udah dipisah. var kode ini ntar dimasukkin ke artikel_kategori; operasi create taruh sini
-            $art_kategori = new Artikel_kategori;
-            $art_kategori->id_artikel = $artikel->id_artikel;
-            $art_kategori->kode_kategori = $kode;
-            $art_kategori->save();
-        }
+        $categories = $req->categories;
+        $artikel->kategori->attach($categories);
 
         return response()->json([
             'status' => 'success',
             'message' => 'successfully create new article',
-            'data' => ([
-                'id' => $artikel->id_artikel,
-                'judul' => $req->judul,
-                'headline' => $req->headline,
-                // 'nama_kategori' => []
-            ])
+            'data' => $artikel
         ], 200);
     }
 
