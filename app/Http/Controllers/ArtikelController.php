@@ -100,13 +100,20 @@ class ArtikelController extends Controller
 
     public function deleteArtikel($id)
     {
-        Artikel::find($id)->delete();
-        Artikel_kategori::where('id_artikel', $id)->delete();
+        $artikel = Artikel::find($id);
+        if (!$artikel) {
+            return response()->json([
+                'status' => 'failed',
+                'message' => 'article data not found',
+            ], 404);
+        }
+
+        $artikel->kategori()->detach();
+        $artikel->delete();
 
         return response()->json([
             'status' => 'success',
-            'message' => 'successfully deleted article',
-            'data' => null
+            'message' => 'successfully deleted article'
         ], 200);
     }
 }
