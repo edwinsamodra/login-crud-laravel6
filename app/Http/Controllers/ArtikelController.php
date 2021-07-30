@@ -18,16 +18,16 @@ class ArtikelController extends Controller
 
     public function readAllArtikel(Request $req)
     {
-        $artikel = new Artikel();
+        $artikel = Artikel::with('kategori');
         
         if ($kategori = $req->query->get('kategori')) {
             $artikel = $artikel->whereHas('kategori', function ($query) use ($kategori) {
-                $query->where('nama_kategori', $kategori);
+                $query->where('kategori.kode_kategori', $kategori);
             });
         }
 
         if ($judul = $req->query->get('judul')) {
-            $artikel = $this->model->where('judul', 'like', '%'.$judul.'%');
+            $artikel = $artikel->where('judul', 'like', '%'.$judul.'%');
         }
 
         $artikel = $artikel->get();
