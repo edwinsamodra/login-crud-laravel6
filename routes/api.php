@@ -12,11 +12,9 @@ Route::namespace('Auth')->group(function () {
 Route::prefix('artikel')->group(function () {
     Route::post('', 'ArtikelController@createArtikel');
     Route::get('', 'ArtikelController@readAllArtikel');
-    Route::get('/id/{id}', 'ArtikelController@readDetailArtikel');
-    Route::get('/judul/{judul}', 'ArtikelController@readByTitle');
-    Route::get('/kategori/{kategori}', 'ArtikelController@readByCategory');
-    Route::post('/{id}', 'ArtikelController@updateArtikel');
-    Route::delete('/{id}', 'ArtikelController@deleteArtikel');
+    Route::get('{id}', 'ArtikelController@readDetailArtikel');
+    Route::put('{id}', 'ArtikelController@updateArtikel');
+    Route::delete('{id}', 'ArtikelController@deleteArtikel');
 });
 
 // CRUD Kategori
