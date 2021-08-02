@@ -8,7 +8,7 @@ Route::namespace('Auth')->group(function () {
     Route::post('logout', 'LogoutController');
 });
 
-// CRUD Artikel
+// CRUD Artikela
 Route::prefix('artikel')->group(function () {
     Route::post('', 'ArtikelController@createArtikel');
     Route::get('', 'ArtikelController@readAllArtikel');
