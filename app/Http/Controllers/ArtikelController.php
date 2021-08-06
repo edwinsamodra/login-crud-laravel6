@@ -16,61 +16,43 @@ class ArtikelController extends Controller
         $this->middleware('auth:api')->except(['readAllArtikel', 'readDetailArtikel', 'readByCategory', 'readByTitle']);
     }
 
+    public function readAllArtikel(Request $req)
+    {
+        $artikel = Artikel::with('kategori');
+        
+        if ($kategori = $req->query->get('kategori')) {
+            $artikel = $artikel->whereHas('kategori', function ($query) use ($kategori) {
+                $query->where('kategori.kode_kategori', $kategori);
+            });
+        }
+
+        if ($judul = $req->query->get('judul')) {
+            $artikel = $artikel->where('judul', 'like', '%'.$judul.'%');
+        }
+
+        $artikel = $artikel->get();
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'successfully read all articles',
+            'data' => $artikel
+        ], 200);
+    }
+
     public function readDetailArtikel($id)
     {
+        $artikel = Artikel::find($id);
+        if (!$artikel) {
+            return response()->json([
+                'status' => 'failed',
+                'message' => 'article data not found',
+            ], 404);
+        }
+
         return response()->json([
             'status' => 'success',
             'message' => 'successfully read all articles',
-            'data' => ([
-                "artikel_data" => Artikel::where('id_artikel', $id)->get(),
-                "kategori" =>   Artikel_kategori::select("kategori.nama_kategori")
-                                ->join("kategori", function($join) {
-                                    $join->on("kategori.kode_kategori", "=", "artikel_kategori.kode_kategori");
-                                })
-                                ->where('id_artikel', $id)->get()
-            ])
-        ], 200);
-    }
-
-    public function readAllArtikel()
-    {
-        return response()->json([
-            'status' => 'success',
-            'message' => 'successfully read all articles',
-            'data' => Artikel::select("id_artikel", "judul", "headline", "created_at", "updated_at")->get()
-        ], 200);
-    }
-
-    public function readByCategory($kategori)
-    {
-        $data = Artikel::select("artikel")
-        ->join("artikel_kategori", function($join) {
-            $join->on("artikel_kategori.id_artikel", "=", "artikel.id_artikel");
-        })
-        ->join("kategori", function($join) {
-            $join->on("kategori.kode_kategori", "=", "artikel_kategori.kode_kategori");
-        })
-        ->select("artikel_kategori.id", "artikel.judul", "artikel.headline", "artikel.created_at", "artikel.updated_at")
-        ->where("kategori.kode_kategori", "=", $kategori)
-        ->get();
-
-        return response()->json([
-            'status' => 'success',
-            'message' => 'successfully read all articles by category',
-            'data' => $data
-        ], 200);
-    }
-
-    public function readByTitle($judul)
-    {
-        $data = Artikel::select("id_artikel", "judul", "headline", "created_at", "updated_at")
-        ->where("artikel.judul", "like", "%" . $judul . "%")
-        ->get();
-
-        return response()->json([
-            'status' => 'success',
-            'message' => 'successfully read all articles by title',
-            'data' => $data
+            'data' => $artikel
         ], 200);
     }
 
@@ -82,50 +64,56 @@ class ArtikelController extends Controller
         $artikel->isi = $req->isi;
         $artikel->save();
 
-        $categories = explode('&', $req->nama_kategori);
-
-        foreach ($categories as $key => $category) {
-            $kode = strtoupper(substr($category, 0, 3));
-
-            // ini udah dipisah. var kode ini ntar dimasukkin ke artikel_kategori; operasi create taruh sini
-            $art_kategori = new Artikel_kategori;
-            $art_kategori->id_artikel = $artikel->id_artikel;
-            $art_kategori->kode_kategori = $kode;
-            $art_kategori->save();
-        }
+        $categories = $req->categories;
+        $artikel->kategori()->attach($categories);
 
         return response()->json([
             'status' => 'success',
             'message' => 'successfully create new article',
-            'data' => ([
-                'id' => $artikel->id_artikel,
-                'judul' => $req->judul,
-                'headline' => $req->headline,
-                // 'nama_kategori' => []
-            ])
+            'data' => $artikel
         ], 200);
     }
 
     public function updateArtikel(Request $req, $id)
     {
-        Artikel::where('id_artikel', $id)->update($req->all());
+        $artikel = Artikel::find($id);
+        if (!$artikel) {
+            return response()->json([
+                'status' => 'failed',
+                'message' => 'article data not found',
+            ], 404);
+        }
+        $artikel->judul = $req->judul;
+        $artikel->headline = $req->headline;
+        $artikel->isi = $req->isi;
+        $artikel->save();
+        $artikel->kategori()->detach();
+        $categories = $req->categories;
+        $artikel->kategori()->attach($categories);
 
         return response()->json([
             'status' => 'success',
             'message' => 'successfully updated article',
-            'data' => $req->all()
+            'data' => $artikel
         ], 200);
     }
 
     public function deleteArtikel($id)
     {
-        Artikel::find($id)->delete();
-        Artikel_kategori::where('id_artikel', $id)->delete();
+        $artikel = Artikel::find($id);
+        if (!$artikel) {
+            return response()->json([
+                'status' => 'failed',
+                'message' => 'article data not found',
+            ], 404);
+        }
+
+        $artikel->kategori()->detach();
+        $artikel->delete();
 
         return response()->json([
             'status' => 'success',
-            'message' => 'successfully deleted article',
-            'data' => null
+            'message' => 'successfully deleted article'
         ], 200);
     }
 }

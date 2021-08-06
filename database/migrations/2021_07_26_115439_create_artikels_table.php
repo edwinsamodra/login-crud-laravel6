@@ -19,7 +19,7 @@ class CreateArtikelsTable extends Migration
             $table->string('judul', 225)->nullable();
             $table->string('headline', 225)->nullable();
             $table->text('isi', 100)->nullable();
-            $table->nullableTimestamps();
+            $table->timestamps();
         });
     }
 
